@@ -44,8 +44,6 @@ struct ayumi {
   double y_right[4];
   double decimator_left[DECIMATOR_SIZE];
   double decimator_right[DECIMATOR_SIZE];
-  int eqp_on;
-  int dc_filter_on;
   int dc_index;
   struct dc_filter dc_left;
   struct dc_filter dc_right;
@@ -54,7 +52,7 @@ struct ayumi {
 };
 
 void ayumi_configure(struct ayumi* ay, int is_ym, double clock_rate, int sr);
-void ayumi_set_pan(struct ayumi* ay, int index, double pan);
+void ayumi_set_pan(struct ayumi* ay, int index, double pan, int is_eqp);
 void ayumi_set_tone(struct ayumi* ay, int index, int period);
 void ayumi_set_noise(struct ayumi* ay, int period);
 void ayumi_set_mixer(struct ayumi* ay, int index, int t_off, int n_off, int e_on);

@@ -107,10 +107,9 @@ int main(int argc, char** argv) {
     return EXIT_FAILURE;
   }
   ayumi_configure(&ay, d.is_ym, d.clock_rate, SR);
-  ay.eqp_on = d.eqp_on;
-  ayumi_set_pan(&ay, 0, d.pan[0]);
-  ayumi_set_pan(&ay, 1, d.pan[1]);
-  ayumi_set_pan(&ay, 2, d.pan[2]);
+  ayumi_set_pan(&ay, 0, d.pan[0], d.eqp_on);
+  ayumi_set_pan(&ay, 1, d.pan[1], d.eqp_on);
+  ayumi_set_pan(&ay, 2, d.pan[2], d.eqp_on);
   ayumi_render(&ay, &d, sample_data);
   if (!save_wave_file(argv[2], sample_data, SR, 2, sample_count)) {
     printf("Save error\n");

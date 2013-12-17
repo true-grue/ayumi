@@ -153,8 +153,8 @@ void ayumi_configure(struct ayumi* ay, int is_ym, double clock_rate, int sr) {
   }
 }
 
-void ayumi_set_pan(struct ayumi* ay, int index, double pan) {
-  if (ay->eqp_on) {
+void ayumi_set_pan(struct ayumi* ay, int index, double pan, int is_eqp) {
+  if (is_eqp) {
     ay->channels[index].pan_left = sqrt(1 - pan);
     ay->channels[index].pan_right = sqrt(pan);
   } else {
