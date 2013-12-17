@@ -123,7 +123,7 @@ int load_text_file(const char* name, struct text_data* d) {
       d->volume = n / 100.;
     } else if (parse_next(&p, "eqp_stereo")) {
       d->eqp_on = 1;
-    } else if (parse_next(&p, "dc_filter")) {
+    } else if (parse_next(&p, "remove_dc")) {
       d->dc_filter_on = 1;
     } else if (parse_next(&p, "frame_count") && parse_number(&p, &n)) {
       d->frame_data = (unsigned int*) malloc(n * 16 * sizeof(int));

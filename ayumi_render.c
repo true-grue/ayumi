@@ -76,10 +76,9 @@ void ayumi_render(struct ayumi* ay, struct text_data* d, float* sample_data) {
       update_ayumi_state(ay, &d->frame_data[frame * 16]);
       frame += 1;
     }
+    ayumi_process(ay);
     if (d->dc_filter_on) {
-      ayumi_process_without_dc(ay);
-    } else {
-      ayumi_process(ay);
+      ayumi_remove_dc(ay);
     }
     out[0] = (float) (ay->left * d->volume);
     out[1] = (float) (ay->right * d->volume);

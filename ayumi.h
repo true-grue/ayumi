@@ -60,6 +60,6 @@ void ayumi_set_volume(struct ayumi* ay, int index, int volume);
 void ayumi_set_envelope(struct ayumi* ay, int period);
 void ayumi_set_envelope_shape(struct ayumi* ay, int shape);
 void ayumi_process(struct ayumi* ay);
-void ayumi_process_without_dc(struct ayumi* ay);
+void ayumi_remove_dc(struct ayumi* ay);
 
 #endif

@@ -332,8 +332,7 @@ void ayumi_process(struct ayumi* ay) {
   ay->right = decimator(ay->decimator_right, right_samples);
 }
 
-void ayumi_process_without_dc(struct ayumi* ay) {
-  ayumi_process(ay);
+void ayumi_remove_dc(struct ayumi* ay) {
   ay->left = dc_filter(&ay->dc_left, ay->dc_index, ay->left);
   ay->right = dc_filter(&ay->dc_right, ay->dc_index, ay->right);
   ay->dc_index = (ay->dc_index + 1) & (DC_FILTER_SIZE - 1);
