@@ -10,10 +10,10 @@
 
 #define WAVE_FORMAT_IEEE_FLOAT 3
 
-int save_wave_file(const char* name, float* data, int sample_rate, int sample_count) {
+int save_wave_file(const char* name, float* data,
+  int sample_rate, int channel_count, int sample_count) {
   FILE* f;
   char header[58];
-  int channel_count = 2;
   int sample_size = sizeof(float);  
   int data_size = sample_size * channel_count * sample_count;
   int pad = data_size & 1;
@@ -64,21 +64,25 @@ void update_ayumi_state(struct ayumi* ay, unsigned int* r) {
   }
 }
 
-void ayumi_render(struct ayumi* ay, struct text_data* data, float* sample_data) {
+void ayumi_render(struct ayumi* ay, struct text_data* d, float* sample_data) {
   int frame = 0;
-  int isr_period = SR / data->frame_rate;
+  int isr_period = SR / d->frame_rate;
   int isr_counter = 0;
   float* out = sample_data;
-  while (frame < data->frame_count) {
+  while (frame < d->frame_count) {
     isr_counter += 1;
     if (isr_counter >= isr_period) {
       isr_counter = 0;
-      update_ayumi_state(ay, &data->frame_data[frame * 16]);
+      update_ayumi_state(ay, &d->frame_data[frame * 16]);
       frame += 1;
     }
-    ayumi_process(ay);
-    out[0] = (float) (ay->left * data->volume);
-    out[1] = (float) (ay->right * data->volume);
+    if (d->dc_filter_on) {
+      ayumi_process_without_dc(ay);
+    } else {
+      ayumi_process(ay);
+    }
+    out[0] = (float) (ay->left * d->volume);
+    out[1] = (float) (ay->right * d->volume);
     out += 2;
   }
 }
@@ -86,28 +90,29 @@ void ayumi_render(struct ayumi* ay, struct text_data* data, float* sample_data) 
 int main(int argc, char** argv) {
   int sample_count;
   float* sample_data;
-  struct text_data data;
+  struct text_data d;
   struct ayumi ay;
   if (argc != 3) {
     printf("ayumi_render input.txt output.wav\n");
     return 0;
   }
-  if(!load_text_file(argv[1], &data)) {
+  if(!load_text_file(argv[1], &d)) {
     printf("Load error\n");
     return EXIT_FAILURE;
   }
-  sample_count = (SR / data.frame_rate) * data.frame_count;
+  sample_count = (SR / d.frame_rate) * d.frame_count;
   sample_data = (float*) malloc(sample_count * sizeof(float) * 2);
   if (sample_data == NULL) {
     printf("Memory allocation error\n");
     return EXIT_FAILURE;
   }
-  ayumi_configure(&ay, data.is_ym, data.clock_rate, SR);
-  ayumi_set_pan(&ay, 0, data.pan[0]);
-  ayumi_set_pan(&ay, 1, data.pan[1]);
-  ayumi_set_pan(&ay, 2, data.pan[2]);
-  ayumi_render(&ay, &data, sample_data);
-  if (!save_wave_file(argv[2], sample_data, SR, sample_count)) {
+  ayumi_configure(&ay, d.is_ym, d.clock_rate, SR);
+  ay.eqp_on = d.eqp_on;
+  ayumi_set_pan(&ay, 0, d.pan[0]);
+  ayumi_set_pan(&ay, 1, d.pan[1]);
+  ayumi_set_pan(&ay, 2, d.pan[2]);
+  ayumi_render(&ay, &d, sample_data);
+  if (!save_wave_file(argv[2], sample_data, SR, 2, sample_count)) {
     printf("Save error\n");
     return EXIT_FAILURE;
   }

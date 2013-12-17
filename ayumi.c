@@ -154,8 +154,13 @@ void ayumi_configure(struct ayumi* ay, int is_ym, double clock_rate, int sr) {
 }
 
 void ayumi_set_pan(struct ayumi* ay, int index, double pan) {
-  ay->channels[index].pan_left = sqrt(1 - pan);
-  ay->channels[index].pan_right = sqrt(pan);
+  if (ay->eqp_on) {
+    ay->channels[index].pan_left = sqrt(1 - pan);
+    ay->channels[index].pan_right = sqrt(pan);
+  } else {
+    ay->channels[index].pan_left = 1 - pan;
+    ay->channels[index].pan_right = pan;
+  }
 }
 
 void ayumi_set_tone(struct ayumi* ay, int index, int period) {
@@ -325,6 +330,10 @@ void ayumi_process(struct ayumi* ay) {
   }
   ay->left = decimator(ay->decimator_left, left_samples);
   ay->right = decimator(ay->decimator_right, right_samples);
+}
+
+void ayumi_process_without_dc(struct ayumi* ay) {
+  ayumi_process(ay);
   ay->left = dc_filter(&ay->dc_left, ay->dc_index, ay->left);
   ay->right = dc_filter(&ay->dc_right, ay->dc_index, ay->right);
   ay->dc_index = (ay->dc_index + 1) & (DC_FILTER_SIZE - 1);

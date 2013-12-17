@@ -44,6 +44,8 @@ struct ayumi {
   double y_right[4];
   double decimator_left[DECIMATOR_SIZE];
   double decimator_right[DECIMATOR_SIZE];
+  int eqp_on;
+  int dc_filter_on;
   int dc_index;
   struct dc_filter dc_left;
   struct dc_filter dc_right;
@@ -60,5 +62,6 @@ void ayumi_set_volume(struct ayumi* ay, int index, int volume);
 void ayumi_set_envelope(struct ayumi* ay, int period);
 void ayumi_set_envelope_shape(struct ayumi* ay, int shape);
 void ayumi_process(struct ayumi* ay);
+void ayumi_process_without_dc(struct ayumi* ay);
 
 #endif

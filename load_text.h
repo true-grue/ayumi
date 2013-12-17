@@ -10,6 +10,8 @@ struct text_data {
   int frame_count;
   double pan[3];
   double volume;
+  int eqp_on;
+  int dc_filter_on;
   unsigned int* frame_data;
 };
 

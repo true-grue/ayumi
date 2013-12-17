@@ -113,13 +113,6 @@ int load_text_file(const char* name, struct text_data* d) {
       d->clock_rate = n;
     } else if (parse_next(&p, "frame_rate") && parse_number(&p, &n)) {
       d->frame_rate = n;
-    } else if (parse_next(&p, "frame_count") && parse_number(&p, &n)) {
-      d->frame_data = (unsigned int*) malloc(n * 16 * sizeof(int));
-      if (d->frame_data == NULL) {
-        ok = 0;
-        break;
-      }
-      d->frame_count = n;
     } else if (parse_next(&p, "pan_a") && parse_number(&p, &n)) {
       d->pan[0] = n / 100.;
     } else if (parse_next(&p, "pan_b") && parse_number(&p, &n)) {
@@ -128,6 +121,17 @@ int load_text_file(const char* name, struct text_data* d) {
       d->pan[2] = n / 100.;
     } else if (parse_next(&p, "volume") && parse_number(&p, &n)) {
       d->volume = n / 100.;
+    } else if (parse_next(&p, "eqp_stereo")) {
+      d->eqp_on = 1;
+    } else if (parse_next(&p, "dc_filter")) {
+      d->dc_filter_on = 1;
+    } else if (parse_next(&p, "frame_count") && parse_number(&p, &n)) {
+      d->frame_data = (unsigned int*) malloc(n * 16 * sizeof(int));
+      if (d->frame_data == NULL) {
+        ok = 0;
+        break;
+      }
+      d->frame_count = n;
     } else if (parse_next(&p, "frame_data") && parse_frames(&p, d->frame_data, d->frame_count)) {
       break;
     } else {

@@ -4,13 +4,13 @@ import sys
 import struct
 
 Header = '''\
-is_ym 0
-clock_rate 1773400
-frame_rate 50
+is_ym 1
+clock_rate 1750000
+frame_rate 49
 frame_count %d
 pan_a 0
-pan_b 100
-pan_c 50
+pan_b 50
+pan_c 100
 volume 50
 frame_data
 %s
