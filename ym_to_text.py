@@ -8,8 +8,8 @@ is_ym 1
 clock_rate %d
 frame_rate %d
 frame_count %d
-pan_a 0
-pan_b 100
+pan_a 10
+pan_b 90
 pan_c 50
 volume 50
 frame_data

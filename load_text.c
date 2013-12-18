@@ -121,10 +121,10 @@ int load_text_file(const char* name, struct text_data* d) {
       d->pan[2] = n / 100.;
     } else if (parse_next(&p, "volume") && parse_number(&p, &n)) {
       d->volume = n / 100.;
-    } else if (parse_next(&p, "eqp_stereo")) {
+    } else if (parse_next(&p, "enable_eqp_stereo")) {
       d->eqp_on = 1;
-    } else if (parse_next(&p, "remove_dc")) {
-      d->dc_filter_on = 1;
+    } else if (parse_next(&p, "disable_dc_filter")) {
+      d->dc_filter_off = 1;
     } else if (parse_next(&p, "frame_count") && parse_number(&p, &n)) {
       d->frame_data = (unsigned int*) malloc(n * 16 * sizeof(int));
       if (d->frame_data == NULL) {

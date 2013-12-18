@@ -289,12 +289,6 @@ static double decimator(double* x, double* samples) {
   return sum;
 }
 
-static double dc_filter(struct dc_filter* dc, int index, double x) {
-  dc->sum += -dc->delay[index] + x;
-  dc->delay[index] = x; 
-  return x - dc->sum / DC_FILTER_SIZE;
-}
-
 void ayumi_process(struct ayumi* ay) {
   int i;
   double c0;
@@ -330,6 +324,12 @@ void ayumi_process(struct ayumi* ay) {
   }
   ay->left = decimator(ay->decimator_left, left_samples);
   ay->right = decimator(ay->decimator_right, right_samples);
+}
+
+static double dc_filter(struct dc_filter* dc, int index, double x) {
+  dc->sum += -dc->delay[index] + x;
+  dc->delay[index] = x; 
+  return x - dc->sum / DC_FILTER_SIZE;
 }
 
 void ayumi_remove_dc(struct ayumi* ay) {

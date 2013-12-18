@@ -8,9 +8,9 @@ is_ym 1
 clock_rate 1750000
 frame_rate 49
 frame_count %d
-pan_a 0
+pan_a 10
 pan_b 50
-pan_c 100
+pan_c 90
 volume 50
 frame_data
 %s

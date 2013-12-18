@@ -11,7 +11,7 @@ struct text_data {
   double pan[3];
   double volume;
   int eqp_on;
-  int dc_filter_on;
+  int dc_filter_off;
   unsigned int* frame_data;
 };
 
