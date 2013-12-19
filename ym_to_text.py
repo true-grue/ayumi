@@ -9,8 +9,8 @@ clock_rate %d
 frame_rate %d
 frame_count %d
 pan_a 10
-pan_b 90
-pan_c 50
+pan_b 50
+pan_c 90
 volume 50
 frame_data
 '''

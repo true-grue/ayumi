@@ -57,7 +57,7 @@ static int update_tone(struct ayumi* ay, int index) {
 static int update_noise(struct ayumi* ay) {
   int bit0x3;
   ay->noise_counter += 1;
-  if (ay->noise_counter >= ay->noise_period) {
+  if (ay->noise_counter >= (ay->noise_period << 1)) {
     ay->noise_counter = 0;
     bit0x3 = ((ay->noise ^ (ay->noise >> 3)) & 1);
     ay->noise = (ay->noise >> 1) | (bit0x3 << 16);

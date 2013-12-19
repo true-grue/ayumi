@@ -1,7 +1,6 @@
 # Author: Peter Sovietov
 
 import sys
-import struct
 
 Header = '''\
 is_ym 0
