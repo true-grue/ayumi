@@ -3,65 +3,67 @@
 import sys
 import struct
 
-Header = '''\
-is_ym 1
-clock_rate %d
-frame_rate %d
-frame_count %d
-pan_a 10
-pan_b 50
-pan_c 90
-volume 50
-frame_data
-'''
+Header_template = {
+  'pan_a': 10,
+  'pan_b': 50,
+  'pan_c': 90,
+  'volume': 50
+}
 
-def generate_text(clock_rate, frame_rate, frame_count, frame_data):
-  text = Header % (clock_rate, frame_rate, frame_count)
+def save_text(name, header, frame_data):
+  header_data = ''
+  for k, v in sorted(header.items()):
+    header_data += '%s %d\n' % (k, v)
+  f = open(name, 'wb')
+  f.write(header_data + 'frame_data\n' + frame_data)
+  f.close
+
+def frames_to_text(frame_data):
+  text = ''
   for i in range(len(frame_data)):
     for j in range(15):
       text += str(frame_data[i][j]) + ' '
     text += str(frame_data[i][15]) + '\n'
   return text
 
-def ym_to_text(ym_data): 
-  header = struct.unpack('>4s8sIIHIHIH', ym_data[:34])
-  frame_count = header[2]
-  interleaved = header[3] & 1
-  sample_count = header[4]
-  clock_rate = header[5]
-  frame_rate = header[6]
-  ym_data = ym_data[34:]
+def get_frame_data(header, file_data):
+  for k, v in Header_template.items():
+    header[k] = v
+  if file_data[4:12] != 'LeOnArD!':
+    return False
+  ym_header = struct.unpack('>4s8sIIHIHIH', file_data[:34])
+  header['frame_count'] = ym_header[2]
+  interleaved = ym_header[3] & 1
+  sample_count = ym_header[4]
+  header['clock_rate'] = ym_header[5]
+  header['frame_rate'] = ym_header[6]
+  file_data = file_data[34:]
   for i in range(sample_count):
-    sample_size = struct.unpack('>I', ym_data[:4])[0]
-    ym_data = ym_data[4 + sample_size:]
-  zero = ym_data.find('\0')
-  ym_data = ym_data[zero + 1:]
-  zero = ym_data.find('\0')
-  ym_data = ym_data[zero + 1:]
-  zero = ym_data.find('\0')
-  ym_data = ym_data[zero + 1:]
+    sample_size = struct.unpack('>I', file_data[:4])[0]
+    file_data = file_data[4 + sample_size:]
+  zero = file_data.find('\0')
+  file_data = file_data[zero + 1:]
+  zero = file_data.find('\0')
+  file_data = file_data[zero + 1:]
+  zero = file_data.find('\0')
+  file_data = file_data[zero + 1:]
   frame_data = []
-  for i in range(frame_count):
+  for i in range(header['frame_count']):
     frame_data.append([0] * 16)
-  if interleaved:
-    for i in range(16):
-      for j in range(frame_count):
-        frame_data[j][i] = ord(ym_data[i * frame_count + j])
-  else:
-    for i in range(frame_count):
-      for j in range(16):
-        frame_data[i][j] = ord(ym_data[i * 16 + j])
-  return generate_text(clock_rate, frame_rate, frame_count, frame_data)
+  for i in range(14):
+    for j in range(header['frame_count']):
+      frame_data[j][i] = ord(file_data[i * header['frame_count'] + j])
+  return frames_to_text(frame_data)
 
-if len(sys.argv) != 3:
-  print('ym_to_text input.ym output.txt')
-  sys.exit(0)
-f = open(sys.argv[1], 'rb')
-ym_data = f.read()
-f.close()
-if ym_data[4:12] != 'LeOnArD!':
-  print('Compressed file?')
-  sys.exit(0)
-f = open(sys.argv[2], 'wb')
-f.write(ym_to_text(ym_data))
-f.close
+if __name__ == '__main__':
+  if len(sys.argv) != 3:
+    print('ym_to_text input.ym output.txt')
+    sys.exit(0)
+  f = open(sys.argv[1], 'rb')
+  file_data = f.read()
+  f.close()
+  frame_data = get_frame_data(Header_template, file_data)
+  if not frame_data:
+    print('Unknown format')
+    sys.exit(0)
+  save_text(sys.argv[2], Header_template, frame_data)

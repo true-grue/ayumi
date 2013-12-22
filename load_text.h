@@ -4,15 +4,16 @@
 #define LOAD_TEXT_H
 
 struct text_data {
+  int sample_rate;
   int is_ym;
   int clock_rate;
-  int frame_rate;
+  double frame_rate;
   int frame_count;
   double pan[3];
   double volume;
-  int eqp_on;
-  int dc_filter_off;
-  unsigned int* frame_data;
+  int eqp_stereo_on;
+  int dc_filter_on;
+  int* frame_data;
 };
 
 struct text_parser {
@@ -21,6 +22,6 @@ struct text_parser {
   char* text;
 };
 
-int load_text_file(const char* name, struct text_data* d);
+int load_text_file(const char* name, struct text_data* t);
 
 #endif

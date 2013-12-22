@@ -2,20 +2,24 @@
 
 import sys
 
-Header = '''\
-is_ym 0
-clock_rate 1773400
-frame_rate 50
-frame_count %d
-pan_a 50
-pan_b 0
-pan_c 0
-volume 140
-frame_data
-%s
-'''
+Header_template = {
+  'pan_a': 50,
+  'pan_b': 0,
+  'pan_c': 0,
+  'volume': 140
+}
 
-def afx_to_text(afx_data): 
+def save_text(name, header, frame_data):
+  header_data = ''
+  for k, v in sorted(header.items()):
+    header_data += '%s %d\n' % (k, v)
+  f = open(name, 'wb')
+  f.write(header_data + 'frame_data\n' + frame_data)
+  f.close
+
+def get_frame_data(header, file_data): 
+  for k, v in Header_template.items():
+    header[k] = v
   frame = '%d %d 0 0 0 0 %d %d %d 0 0 0 0 255 0 0\n'
   volume = 0
   tone = 0
@@ -24,33 +28,36 @@ def afx_to_text(afx_data):
   n_off = 0
   status = 0
   frame_data = ''
-  frame_count = 0
+  header['frame_count'] = 0
   index = 0
-  while index < len(afx_data):
-    status = ord(afx_data[index])
+  while index < len(file_data):
+    status = ord(file_data[index])
     volume = status & 0xf
     t_off = (status & 0x10) != 0
     n_off = (status & 0x80) != 0
     index += 1
     if status & 0x20:
-      tone = ord(afx_data[index]) | (ord(afx_data[index + 1]) << 8)
+      tone = ord(file_data[index]) | (ord(file_data[index + 1]) << 8)
       index += 2
     if status & 0x40:
-      noise = ord(afx_data[index])
+      noise = ord(file_data[index])
       index += 1
     if noise == 0x20:
       break
     frame_data += frame % (tone & 0xff,
       (tone >> 8) & 0xf, noise, t_off | (n_off << 3), volume)
-    frame_count += 1
-  return Header % (frame_count, frame_data)
+    header['frame_count'] += 1
+  return frame_data
 
-if len(sys.argv) != 3:
-  print('afx_to_text input.afx output.txt')
-  sys.exit(0)
-f = open(sys.argv[1], 'rb')
-afx_data = f.read()
-f.close()
-f = open(sys.argv[2], 'wb')
-f.write(afx_to_text(afx_data))
-f.close
+if __name__ == '__main__':
+  if len(sys.argv) != 3:
+    print('afx_to_text input.afx output.txt')
+    sys.exit(0)
+  f = open(sys.argv[1], 'rb')
+  file_data = f.read()
+  f.close()
+  frame_data = get_frame_data(Header_template, file_data)
+  if not frame_data:
+    print('Unknown format')
+    sys.exit(0)
+  save_text(sys.argv[2], Header_template, frame_data)
