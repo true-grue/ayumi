@@ -1,3 +1,5 @@
+# Author: Peter Sovietov
+
 import os
 import sys
 import subprocess
