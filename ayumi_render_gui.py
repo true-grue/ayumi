@@ -2,6 +2,7 @@
 
 import os
 import sys
+import locale
 import subprocess
 from Tkinter import *
 import tkFileDialog
@@ -63,10 +64,10 @@ class Ayumi_render_window:
       self.header['frame_rate'].set(48.828125)).grid(row=6, column=2, sticky=W+E)
     Button(self.root, text='50', command=lambda:
       self.header['frame_rate'].set(50)).grid(row=6, column=3, sticky=W+E)
-    Button(self.root, text='YM2149', command=lambda:
-      self.header['is_ym'].set(1)).grid(row=7, column=2, sticky=W+E)
     Button(self.root, text='AY-3-8910', command=lambda:
-      self.header['is_ym'].set(0)).grid(row=7, column=3, sticky=W+E)
+      self.header['is_ym'].set(0)).grid(row=7, column=2, sticky=W+E)
+    Button(self.root, text='YM2149', command=lambda:
+      self.header['is_ym'].set(1)).grid(row=7, column=3, sticky=W+E)
     Button(self.root, text='44100', command=lambda:
       self.header['sample_rate'].set(44100)).grid(row=11, column=2, sticky=W+E)
     Button(self.root, text='48000', command=lambda:
@@ -120,9 +121,10 @@ def save_text(name, header, frame_data):
   f.close
 
 def start_ayumi_render(self, command):
+  localized = map(lambda x: x.encode(locale.getpreferredencoding()), command)
   startupinfo = subprocess.STARTUPINFO()
   startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-  p = subprocess.Popen(command, startupinfo=startupinfo)
+  p = subprocess.Popen(localized, startupinfo=startupinfo)
   if p.wait():
     self.l_save['text'] = 'Save error'
   else:
