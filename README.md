@@ -1,7 +1,5 @@
-AYUMI
-=====
-
-Ayumi is a highly precise emulation of AY-3-8910 and YM2149 sound chips.
+Ayumi API reference
+===================
 
     void ayumi_configure(struct ayumi* ay, int is_ym, double clock_rate, int sr)
 
