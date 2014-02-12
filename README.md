@@ -87,7 +87,7 @@ Ayumi is a highly precise emulation of AY-3-8910 and YM2149 sound chips.
 
     void ayumi_process(struct ayumi* ay)
 
-*Renders the next stereo sample in ay.left and ay.right.*
+*Renders the next stereo sample in ay->left and ay->right.*
 
 **ay**: The pointer to the ayumi structure.
 
