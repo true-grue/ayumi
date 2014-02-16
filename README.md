@@ -1,7 +1,9 @@
 Ayumi API reference
 ===================
 
-    void ayumi_configure(struct ayumi* ay, int is_ym, double clock_rate, int sr)
+``` c
+void ayumi_configure(struct ayumi* ay, int is_ym, double clock_rate, int sr)
+```
 
 *Configures the ayumi structure.*
 
@@ -13,7 +15,9 @@ Ayumi API reference
 
 **sr**: The output sample rate.
 
-    void ayumi_set_pan(struct ayumi* ay, int index, double pan, int is_eqp)
+``` c
+void ayumi_set_pan(struct ayumi* ay, int index, double pan, int is_eqp)
+```
 
 *Sets the panning value for the specified sound channel.*
 
@@ -25,7 +29,9 @@ Ayumi API reference
 
 **is_eqp**: 1 if "equal power" panning is used.
 
-    void ayumi_set_tone(struct ayumi* ay, int index, int period)
+``` c
+void ayumi_set_tone(struct ayumi* ay, int index, int period)
+```
 
 *Sets the tone period value for the specified sound channel.*
 
@@ -35,7 +41,9 @@ Ayumi API reference
 
 **period**: The tone period value [0-4095].
 
-    void ayumi_set_noise(struct ayumi* ay, int period)
+``` c
+void ayumi_set_noise(struct ayumi* ay, int period)
+```
 
 *Sets the noise period value.*
 
@@ -43,7 +51,9 @@ Ayumi API reference
 
 **period**: The noise period value [0-31].
 
-    void ayumi_set_mixer(struct ayumi* ay, int index, int t_off, int n_off, int e_on)
+``` c
+void ayumi_set_mixer(struct ayumi* ay, int index, int t_off, int n_off, int e_on)
+```
 
 *Sets the mixer value for the specified sound channel.*
 
@@ -57,7 +67,9 @@ Ayumi API reference
 
 **e_on**: 1 if the envelope is on.
 
-    void ayumi_set_volume(struct ayumi* ay, int index, int volume)
+``` c
+void ayumi_set_volume(struct ayumi* ay, int index, int volume)
+```
 
 *Sets the volume for the specified sound channel.*
 
@@ -67,7 +79,9 @@ Ayumi API reference
 
 **volume**: The volume [0-15].
 
-    void ayumi_set_envelope(struct ayumi* ay, int period)
+``` c
+void ayumi_set_envelope(struct ayumi* ay, int period)
+```
 
 *Sets the envelope period value.*
 
@@ -75,7 +89,9 @@ Ayumi API reference
 
 **period**: The envelope period value [0-65535].
 
-    void ayumi_set_envelope_shape(struct ayumi* ay, int shape)
+``` c
+void ayumi_set_envelope_shape(struct ayumi* ay, int shape)
+```
 
 *Sets the envelope shape value.*
 
@@ -83,13 +99,17 @@ Ayumi API reference
 
 **shape**: The envelope shape index [0-15].
 
-    void ayumi_process(struct ayumi* ay)
+``` c
+void ayumi_process(struct ayumi* ay)
+```
 
 *Renders the next stereo sample in ay->left and ay->right.*
 
 **ay**: The pointer to the ayumi structure.
 
-    void ayumi_remove_dc(struct ayumi* ay)
+``` c
+void ayumi_remove_dc(struct ayumi* ay)
+```
 
 *Removes the DC offset from the current sample.*
 
