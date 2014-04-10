@@ -194,7 +194,7 @@ void ayumi_set_envelope_shape(struct ayumi* ay, int shape) {
   reset_segment(ay);
 }
 
-static double decimator(double* x, double* samples) {
+static double decimate(double* x, double* samples) {
   memmove(x + DECIMATOR_FACTOR, x, (DECIMATOR_SIZE - DECIMATOR_FACTOR) * sizeof(double));
   memcpy(x, samples, DECIMATOR_FACTOR * sizeof(double));
   return -0.0000046183113992051936 * (x[1] + x[191]) +
@@ -317,8 +317,8 @@ void ayumi_process(struct ayumi* ay) {
     c2 = 1 / 4. * (ay->y_right[3] - ay->y_right[1] - y1);
     right_samples[i] = (c2 * ay->point + c1) * ay->point + c0;
   }
-  ay->left = decimator(ay->decimator_left, left_samples);
-  ay->right = decimator(ay->decimator_right, right_samples);
+  ay->left = decimate(ay->decimator_left, left_samples);
+  ay->right = decimate(ay->decimator_right, right_samples);
 }
 
 static double dc_filter(struct dc_filter* dc, int index, double x) {

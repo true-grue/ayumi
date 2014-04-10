@@ -74,6 +74,12 @@ class Ayumi_render_window:
       self.header['sample_rate'].set(48000)).grid(row=11, column=3, sticky=W+E)
     Button(self.root, text='96000', command=lambda:
       self.header['sample_rate'].set(96000)).grid(row=11, column=4, sticky=W+E)
+    Button(self.root, text='Disable', command=lambda:
+      self.header['pan_a'].set(-1)).grid(row=8, column=2, sticky=W+E)
+    Button(self.root, text='Disable', command=lambda:
+      self.header['pan_b'].set(-1)).grid(row=9, column=2, sticky=W+E)
+    Button(self.root, text='Disable', command=lambda:
+      self.header['pan_c'].set(-1)).grid(row=10, column=2, sticky=W+E)
     for k, v in sorted(self.header.items()):
       Label(self.root, text=k).grid(row=i, column=0)
       Entry(self.root, textvariable=v).grid(row=i, column=1, sticky=W+E)

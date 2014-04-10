@@ -115,9 +115,15 @@ int main(int argc, char** argv) {
     return EXIT_FAILURE;
   }
   ayumi_configure(&ay, t.is_ym, t.clock_rate, t.sample_rate);
-  ayumi_set_pan(&ay, 0, t.pan[0], t.eqp_stereo_on);
-  ayumi_set_pan(&ay, 1, t.pan[1], t.eqp_stereo_on);
-  ayumi_set_pan(&ay, 2, t.pan[2], t.eqp_stereo_on);
+  if (t.pan[0] >= 0) {
+    ayumi_set_pan(&ay, 0, t.pan[0], t.eqp_stereo_on);
+  }
+  if (t.pan[1] >= 0) {
+    ayumi_set_pan(&ay, 1, t.pan[1], t.eqp_stereo_on);
+  }
+  if (t.pan[2] >= 0) {
+    ayumi_set_pan(&ay, 2, t.pan[2], t.eqp_stereo_on);
+  }
   ayumi_render(&ay, &t, sample_data);
   if (!save_wave_file(argv[2], sample_data, t.sample_rate, 2, sample_count)) {
     printf("Save error\n");
