@@ -307,14 +307,14 @@ void ayumi_process(struct ayumi* ay) {
       ay->y_right[3] = ay->right;
     }
     y1 = ay->y_left[2] - ay->y_left[0];
-    c0 = 1 / 2. * ay->y_left[1] + 1 / 4. * (ay->y_left[0] + ay->y_left[2]);
-    c1 = 1 / 2. * y1;
-    c2 = 1 / 4. * (ay->y_left[3] - ay->y_left[1] - y1);
+    c0 = 0.5 * ay->y_left[1] + 0.25 * (ay->y_left[0] + ay->y_left[2]);
+    c1 = 0.5 * y1;
+    c2 = 0.25 * (ay->y_left[3] - ay->y_left[1] - y1);
     left_samples[i] = (c2 * ay->point + c1) * ay->point + c0;
     y1 = ay->y_right[2] - ay->y_right[0];
-    c0 = 1 / 2. * ay->y_right[1] + 1 / 4. * (ay->y_right[0] + ay->y_right[2]);
-    c1 = 1 / 2. * y1;
-    c2 = 1 / 4. * (ay->y_right[3] - ay->y_right[1] - y1);
+    c0 = 0.5 * ay->y_right[1] + 0.25 * (ay->y_right[0] + ay->y_right[2]);
+    c1 = 0.5 * y1;
+    c2 = 0.25 * (ay->y_right[3] - ay->y_right[1] - y1);
     right_samples[i] = (c2 * ay->point + c1) * ay->point + c0;
   }
   ay->left = decimate(ay->decimator_left, left_samples);

@@ -65,7 +65,7 @@ void update_ayumi_state(struct ayumi* ay, int* r) {
 void ayumi_render(struct ayumi* ay, struct text_data* t, float* sample_data) {
   int frame = 0;
   double isr_step = t->frame_rate / t->sample_rate;
-  double isr_counter = 0;
+  double isr_counter = 1;
   float* out = sample_data;
   while (frame < t->frame_count) {
     isr_counter += isr_step;
@@ -106,13 +106,17 @@ int main(int argc, char** argv) {
   set_default_text_data(&t);
   if(!load_text_file(argv[1], &t)) {
     printf("Load error\n");
-    return EXIT_FAILURE;
+    return 0;
   }
-  sample_count = (int) ((t.sample_rate / t.frame_rate) * (t.frame_count + 1));
+  sample_count = (int) ((t.sample_rate / t.frame_rate) * t.frame_count);
+  if (sample_count == 0) {
+    printf("No frames\n");
+    return 0;
+  }
   sample_data = (float*) malloc(sample_count * sizeof(float) * 2);
   if (sample_data == NULL) {
     printf("Memory allocation error\n");
-    return EXIT_FAILURE;
+    return 0;
   }
   ayumi_configure(&ay, t.is_ym, t.clock_rate, t.sample_rate);
   if (t.pan[0] >= 0) {
@@ -127,7 +131,7 @@ int main(int argc, char** argv) {
   ayumi_render(&ay, &t, sample_data);
   if (!save_wave_file(argv[2], sample_data, t.sample_rate, 2, sample_count)) {
     printf("Save error\n");
-    return EXIT_FAILURE;
+    return 0;
   }
   return 0;
 }
