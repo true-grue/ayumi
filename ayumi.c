@@ -45,7 +45,7 @@ static const double YM_dac_table[] = {
 static void reset_segment(struct ayumi* ay);
 
 static int update_tone(struct ayumi* ay, int index) {
-  struct sound_channel* ch = &ay->channels[index];
+  struct tone_channel* ch = &ay->channels[index];
   ch->tone_counter += 1;
   if (ch->tone_counter >= ch->tone_period) {
     ch->tone_counter = 0;
@@ -133,7 +133,7 @@ static void update_mixer(struct ayumi* ay) {
   int envelope = update_envelope(ay);
   ay->left = 0;
   ay->right = 0;
-  for (i = 0; i < SOUND_CHANNELS; i += 1) {
+  for (i = 0; i < TONE_CHANNELS; i += 1) {
     out = (update_tone(ay, i) | ay->channels[i].t_off) & (noise | ay->channels[i].n_off);
     out *= ay->channels[i].e_on ? envelope : ay->channels[i].volume * 2 + 1;
     ay->left += ay->dac_table[out] * ay->channels[i].pan_left;
@@ -148,7 +148,7 @@ void ayumi_configure(struct ayumi* ay, int is_ym, double clock_rate, int sr) {
   ay->dac_table = is_ym ? YM_dac_table : AY_dac_table;
   ay->noise = 1;
   ayumi_set_envelope(ay, 1);
-  for (i = 0; i < SOUND_CHANNELS; i += 1) {
+  for (i = 0; i < TONE_CHANNELS; i += 1) {
     ayumi_set_tone(ay, i, 1);
   }
 }
@@ -286,39 +286,40 @@ static double decimate(double* x, double* samples) {
 
 void ayumi_process(struct ayumi* ay) {
   int i;
-  double c0;
-  double c1;
-  double c2;
   double y1;
-  double left_samples[DECIMATOR_FACTOR];
-  double right_samples[DECIMATOR_FACTOR];
+  double* c_left = ay->interpolator_left.c;
+  double* y_left = ay->interpolator_left.y;
+  double* c_right = ay->interpolator_right.c;
+  double* y_right = ay->interpolator_right.y;
+  double samples_left[DECIMATOR_FACTOR];
+  double samples_right[DECIMATOR_FACTOR];
   for (i = DECIMATOR_FACTOR - 1; i >= 0; i -= 1) {
-    ay->point += ay->step;
-    if (ay->point >= 1) {
-      ay->point -= 1;
-      ay->y_left[0] = ay->y_left[1];
-      ay->y_left[1] = ay->y_left[2];
-      ay->y_left[2] = ay->y_left[3];
-      ay->y_right[0] = ay->y_right[1];
-      ay->y_right[1] = ay->y_right[2];
-      ay->y_right[2] = ay->y_right[3];
+    ay->x += ay->step;
+    if (ay->x >= 1) {
+      ay->x -= 1;
+      y_left[0] = y_left[1];
+      y_left[1] = y_left[2];
+      y_left[2] = y_left[3];
+      y_right[0] = y_right[1];
+      y_right[1] = y_right[2];
+      y_right[2] = y_right[3];
       update_mixer(ay);
-      ay->y_left[3] = ay->left;
-      ay->y_right[3] = ay->right;
+      y_left[3] = ay->left;
+      y_right[3] = ay->right;
+      y1 = y_left[2] - y_left[0];
+      c_left[0] = 0.5 * y_left[1] + 0.25 * (y_left[0] + y_left[2]);
+      c_left[1] = 0.5 * y1;
+      c_left[2] = 0.25 * (y_left[3] - y_left[1] - y1);
+      y1 = y_right[2] - y_right[0];
+      c_right[0] = 0.5 * y_right[1] + 0.25 * (y_right[0] + y_right[2]);
+      c_right[1] = 0.5 * y1;
+      c_right[2] = 0.25 * (y_right[3] - y_right[1] - y1);
     }
-    y1 = ay->y_left[2] - ay->y_left[0];
-    c0 = 0.5 * ay->y_left[1] + 0.25 * (ay->y_left[0] + ay->y_left[2]);
-    c1 = 0.5 * y1;
-    c2 = 0.25 * (ay->y_left[3] - ay->y_left[1] - y1);
-    left_samples[i] = (c2 * ay->point + c1) * ay->point + c0;
-    y1 = ay->y_right[2] - ay->y_right[0];
-    c0 = 0.5 * ay->y_right[1] + 0.25 * (ay->y_right[0] + ay->y_right[2]);
-    c1 = 0.5 * y1;
-    c2 = 0.25 * (ay->y_right[3] - ay->y_right[1] - y1);
-    right_samples[i] = (c2 * ay->point + c1) * ay->point + c0;
+    samples_left[i] = (c_left[2] * ay->x + c_left[1]) * ay->x + c_left[0];
+    samples_right[i] = (c_right[2] * ay->x + c_right[1]) * ay->x + c_right[0];
   }
-  ay->left = decimate(ay->decimator_left, left_samples);
-  ay->right = decimate(ay->decimator_right, right_samples);
+  ay->left = decimate(ay->decimator_left, samples_left);
+  ay->right = decimate(ay->decimator_right, samples_right);
 }
 
 static double dc_filter(struct dc_filter* dc, int index, double x) {

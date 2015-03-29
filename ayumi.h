@@ -4,13 +4,13 @@
 #define AYUMI_H
 
 enum {
-  SOUND_CHANNELS = 3,
+  TONE_CHANNELS = 3,
   DECIMATOR_FACTOR = 8,
   DECIMATOR_SIZE = 192,
   DC_FILTER_SIZE = 1024
 };
 
-struct sound_channel {
+struct tone_channel {
   int tone_period;
   int tone_counter;
   int tone;
@@ -22,13 +22,18 @@ struct sound_channel {
   double pan_right;
 };
 
+struct interpolator {
+  double c[3];
+  double y[4];
+};
+
 struct dc_filter {
   double sum;
   double delay[DC_FILTER_SIZE];
 };
 
 struct ayumi {
-  struct sound_channel channels[SOUND_CHANNELS];
+  struct tone_channel channels[TONE_CHANNELS];
   int noise_period;
   int noise_counter;
   int noise;
@@ -39,9 +44,9 @@ struct ayumi {
   int envelope;
   const double* dac_table;
   double step;
-  double point;
-  double y_left[4];
-  double y_right[4];
+  double x;
+  struct interpolator interpolator_left;
+  struct interpolator interpolator_right;
   double decimator_left[DECIMATOR_SIZE];
   double decimator_right[DECIMATOR_SIZE];
   int dc_index;
