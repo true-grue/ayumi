@@ -35,7 +35,7 @@ static void skip(struct text_parser* p, int (*is_valid)(int)) {
 }
 
 static int parse_next(struct text_parser* p, const char* name) {
-  int size = strlen(name);
+  int size = (int) strlen(name);
   skip(p, isspace);
   if (strncmp(&p->text[p->index], name, size)) {
     return 0;
@@ -51,7 +51,7 @@ int parse_int(struct text_parser* p, int* n) {
   skip(p, isspace);
   start = &p->text[p->index];
   *n = strtol(start, &end, 0);
-  size = end - start;
+  size = (int) (end - start);
   if (size > 0) {
     p->index += size;
     return 1;
@@ -66,7 +66,7 @@ int parse_float(struct text_parser* p, double* n) {
   skip(p, isspace);
   start = &p->text[p->index];
   *n = strtod(start, &end);
-  size = end - start;
+  size = (int) (end - start);
   if (size > 0) {
     p->index += size;
     return 1;
