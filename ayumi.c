@@ -195,7 +195,7 @@ void ayumi_set_envelope_shape(struct ayumi* ay, int shape) {
 }
 
 static double decimate(double* x) {
-  return -0.0000046183113992051936 * (x[1] + x[191]) +
+  double y = -0.0000046183113992051936 * (x[1] + x[191]) +
     -0.00001117761640887225 * (x[2] + x[190]) +
     -0.000018610264502005432 * (x[3] + x[189]) +
     -0.000025134586135631012 * (x[4] + x[188]) +
@@ -280,6 +280,8 @@ static double decimate(double* x) {
     0.11236045936950932 * (x[94] + x[98]) +
     0.12176343577287731 * (x[95] + x[97]) +
     0.125 * x[96];
+  memmove(x + DECIMATE_FACTOR, x, (FIR_SIZE - DECIMATE_FACTOR) * sizeof(double));
+  return y;
 }
 
 void ayumi_process(struct ayumi* ay) {
@@ -289,10 +291,6 @@ void ayumi_process(struct ayumi* ay) {
   double* y_left = ay->interpolator_left.y;
   double* c_right = ay->interpolator_right.c;
   double* y_right = ay->interpolator_right.y;
-  double* d_left = ay->decimator_left;
-  double* d_right = ay->decimator_right;
-  memmove(d_left + DECIMATE_FACTOR, d_left, (FIR_SIZE - DECIMATE_FACTOR) * sizeof(double));
-  memmove(d_right + DECIMATE_FACTOR, d_right, (FIR_SIZE - DECIMATE_FACTOR) * sizeof(double));
   for (i = DECIMATE_FACTOR - 1; i >= 0; i -= 1) {
     ay->x += ay->step;
     if (ay->x >= 1) {
@@ -315,11 +313,11 @@ void ayumi_process(struct ayumi* ay) {
       c_right[1] = 0.5 * y1;
       c_right[2] = 0.25 * (y_right[3] - y_right[1] - y1);
     }
-    d_left[i] = (c_left[2] * ay->x + c_left[1]) * ay->x + c_left[0];
-    d_right[i] = (c_right[2] * ay->x + c_right[1]) * ay->x + c_right[0];
+    ay->fir_left[i] = (c_left[2] * ay->x + c_left[1]) * ay->x + c_left[0];
+    ay->fir_right[i] = (c_right[2] * ay->x + c_right[1]) * ay->x + c_right[0];
   }
-  ay->left = decimate(d_left);
-  ay->right = decimate(d_right);
+  ay->left = decimate(ay->fir_left);
+  ay->right = decimate(ay->fir_right);
 }
 
 static double dc_filter(struct dc_filter* dc, int index, double x) {

@@ -47,8 +47,8 @@ struct ayumi {
   double x;
   struct interpolator interpolator_left;
   struct interpolator interpolator_right;
-  double decimator_left[FIR_SIZE];
-  double decimator_right[FIR_SIZE];
+  double fir_left[FIR_SIZE];
+  double fir_right[FIR_SIZE];
   int dc_index;
   struct dc_filter dc_left;
   struct dc_filter dc_right;
