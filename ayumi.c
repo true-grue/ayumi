@@ -5,41 +5,41 @@
 #include "ayumi.h"
 
 static const double AY_dac_table[] = {
-  0, 0,
-  0.012757, 0.012757,
-  0.018494, 0.018494,
-  0.027054, 0.027054,
-  0.039963, 0.039963,
-  0.059129, 0.059129,
-  0.082353, 0.082353,
-  0.13463, 0.13463,
-  0.158572, 0.158572,
-  0.254917, 0.254917,
-  0.35613, 0.35613,
-  0.446967, 0.446967,
-  0.564111, 0.564111,
-  0.708339, 0.708339,
-  0.842222, 0.842222,
-  1, 1
+  0.0, 0.0,
+  0.00999465934234, 0.00999465934234,
+  0.0144502937362, 0.0144502937362,
+  0.0210574502174, 0.0210574502174,
+  0.0307011520562, 0.0307011520562,
+  0.0455481803616, 0.0455481803616,
+  0.0644998855573, 0.0644998855573,
+  0.107362478065, 0.107362478065,
+  0.126588845655, 0.126588845655,
+  0.20498970016, 0.20498970016,
+  0.292210269322, 0.292210269322,
+  0.372838941024, 0.372838941024,
+  0.492530708782, 0.492530708782,
+  0.635324635691, 0.635324635691,
+  0.805584802014, 0.805584802014,
+  1.0, 1.0
 };
 
 static const double YM_dac_table[] = {
-  0, 0,
-  0.003784, 0.006867,
-  0.010224, 0.012604,
-  0.015412, 0.018906,
-  0.023682, 0.029282,
-  0.035309, 0.04007,
-  0.047776, 0.057649,
-  0.067247, 0.076768,
-  0.091066, 0.10927,
-  0.128405, 0.146822,
-  0.174273, 0.208881,
-  0.243488, 0.278935,
-  0.332021, 0.398993,
-  0.465751, 0.532219,
-  0.632242, 0.753857,
-  0.877272, 1
+  0.0, 0.0,
+  0.00465400167849, 0.00772106507973,
+  0.0109559777218, 0.0139620050355,
+  0.0169985503929, 0.0200198367285,
+  0.024368657969, 0.029694056611,
+  0.0350652323186, 0.0403906309606,
+  0.0485389486534, 0.0583352407111,
+  0.0680552376593, 0.0777752346075,
+  0.0925154497597, 0.111085679408,
+  0.129747463188, 0.148485542077,
+  0.17666895552, 0.211551079576,
+  0.246387426566, 0.281101701381,
+  0.333730067903, 0.400427252613,
+  0.467383840696, 0.53443198291,
+  0.635172045472, 0.75800717174,
+  0.879926756695, 1.0
 };
 
 static void reset_segment(struct ayumi* ay);
@@ -144,7 +144,7 @@ static void update_mixer(struct ayumi* ay) {
 void ayumi_configure(struct ayumi* ay, int is_ym, double clock_rate, int sr) {
   int i;
   memset(ay, 0, sizeof(struct ayumi));
-  ay->step = clock_rate / (sr * 8 * DECIMATOR_FACTOR);
+  ay->step = clock_rate / (sr * 8 * DECIMATE_FACTOR);
   ay->dac_table = is_ym ? YM_dac_table : AY_dac_table;
   ay->noise = 1;
   ayumi_set_envelope(ay, 1);
@@ -194,9 +194,7 @@ void ayumi_set_envelope_shape(struct ayumi* ay, int shape) {
   reset_segment(ay);
 }
 
-static double decimate(double* x, double* samples) {
-  memmove(x + DECIMATOR_FACTOR, x, (DECIMATOR_SIZE - DECIMATOR_FACTOR) * sizeof(double));
-  memcpy(x, samples, DECIMATOR_FACTOR * sizeof(double));
+static double decimate(double* x) {
   return -0.0000046183113992051936 * (x[1] + x[191]) +
     -0.00001117761640887225 * (x[2] + x[190]) +
     -0.000018610264502005432 * (x[3] + x[189]) +
@@ -291,9 +289,11 @@ void ayumi_process(struct ayumi* ay) {
   double* y_left = ay->interpolator_left.y;
   double* c_right = ay->interpolator_right.c;
   double* y_right = ay->interpolator_right.y;
-  double samples_left[DECIMATOR_FACTOR];
-  double samples_right[DECIMATOR_FACTOR];
-  for (i = DECIMATOR_FACTOR - 1; i >= 0; i -= 1) {
+  double* d_left = ay->decimator_left;
+  double* d_right = ay->decimator_right;
+  memmove(d_left + DECIMATE_FACTOR, d_left, (FIR_SIZE - DECIMATE_FACTOR) * sizeof(double));
+  memmove(d_right + DECIMATE_FACTOR, d_right, (FIR_SIZE - DECIMATE_FACTOR) * sizeof(double));
+  for (i = DECIMATE_FACTOR - 1; i >= 0; i -= 1) {
     ay->x += ay->step;
     if (ay->x >= 1) {
       ay->x -= 1;
@@ -315,11 +315,11 @@ void ayumi_process(struct ayumi* ay) {
       c_right[1] = 0.5 * y1;
       c_right[2] = 0.25 * (y_right[3] - y_right[1] - y1);
     }
-    samples_left[i] = (c_left[2] * ay->x + c_left[1]) * ay->x + c_left[0];
-    samples_right[i] = (c_right[2] * ay->x + c_right[1]) * ay->x + c_right[0];
+    d_left[i] = (c_left[2] * ay->x + c_left[1]) * ay->x + c_left[0];
+    d_right[i] = (c_right[2] * ay->x + c_right[1]) * ay->x + c_right[0];
   }
-  ay->left = decimate(ay->decimator_left, samples_left);
-  ay->right = decimate(ay->decimator_right, samples_right);
+  ay->left = decimate(d_left);
+  ay->right = decimate(d_right);
 }
 
 static double dc_filter(struct dc_filter* dc, int index, double x) {

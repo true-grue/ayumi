@@ -84,12 +84,25 @@ class Ayumi_render_window:
       Label(self.root, text=k).grid(row=i, column=0)
       Entry(self.root, textvariable=v).grid(row=i, column=1, sticky=W+E)
       i += 1
+    get_last_settings()
     for k, v in Header_template.items():
       self.header[k].set(v)
     self.frame_data = False
     self.root.resizable(0, 0)
     self.root.title('Ayumi render GUI by Peter Sovietov')
     self.root.mainloop()
+
+def get_last_settings():
+  if os.path.isfile('temp.txt'):
+    f = open('temp.txt', 'r')
+    for line in f:
+      c = line.split()
+      if c[0] == 'frame_data':
+        return
+      if c[0] == 'frame_rate':
+        Header_template[c[0]] = float(c[1])
+      else:
+        Header_template[c[0]] = int(c[1])
 
 def load(self):
   self.frame_data = False

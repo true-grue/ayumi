@@ -5,8 +5,8 @@
 
 enum {
   TONE_CHANNELS = 3,
-  DECIMATOR_FACTOR = 8,
-  DECIMATOR_SIZE = 192,
+  DECIMATE_FACTOR = 8,
+  FIR_SIZE = 192,
   DC_FILTER_SIZE = 1024
 };
 
@@ -23,7 +23,7 @@ struct tone_channel {
 };
 
 struct interpolator {
-  double c[3];
+  double c[4];
   double y[4];
 };
 
@@ -47,8 +47,8 @@ struct ayumi {
   double x;
   struct interpolator interpolator_left;
   struct interpolator interpolator_right;
-  double decimator_left[DECIMATOR_SIZE];
-  double decimator_right[DECIMATOR_SIZE];
+  double decimator_left[FIR_SIZE];
+  double decimator_right[FIR_SIZE];
   int dc_index;
   struct dc_filter dc_left;
   struct dc_filter dc_right;
