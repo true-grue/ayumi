@@ -280,7 +280,7 @@ static double decimate(double* x) {
     0.11236045936950932 * (x[94] + x[98]) +
     0.12176343577287731 * (x[95] + x[97]) +
     0.125 * x[96];
-  memmove(x + DECIMATE_FACTOR, x, (FIR_SIZE - DECIMATE_FACTOR) * sizeof(double));
+  memcpy(&x[FIR_SIZE - DECIMATE_FACTOR], x, DECIMATE_FACTOR * sizeof(double));
   return y;
 }
 
@@ -291,6 +291,9 @@ void ayumi_process(struct ayumi* ay) {
   double* y_left = ay->interpolator_left.y;
   double* c_right = ay->interpolator_right.c;
   double* y_right = ay->interpolator_right.y;
+  double* fir_left = &ay->fir_left[FIR_SIZE - ay->fir_index * DECIMATE_FACTOR];
+  double* fir_right = &ay->fir_right[FIR_SIZE - ay->fir_index * DECIMATE_FACTOR];
+  ay->fir_index = (ay->fir_index + 1) % (FIR_SIZE / DECIMATE_FACTOR - 1);
   for (i = DECIMATE_FACTOR - 1; i >= 0; i -= 1) {
     ay->x += ay->step;
     if (ay->x >= 1) {
@@ -313,11 +316,11 @@ void ayumi_process(struct ayumi* ay) {
       c_right[1] = 0.5 * y1;
       c_right[2] = 0.25 * (y_right[3] - y_right[1] - y1);
     }
-    ay->fir_left[i] = (c_left[2] * ay->x + c_left[1]) * ay->x + c_left[0];
-    ay->fir_right[i] = (c_right[2] * ay->x + c_right[1]) * ay->x + c_right[0];
+    fir_left[i] = (c_left[2] * ay->x + c_left[1]) * ay->x + c_left[0];
+    fir_right[i] = (c_right[2] * ay->x + c_right[1]) * ay->x + c_right[0];
   }
-  ay->left = decimate(ay->fir_left);
-  ay->right = decimate(ay->fir_right);
+  ay->left = decimate(fir_left);
+  ay->right = decimate(fir_right);
 }
 
 static double dc_filter(struct dc_filter* dc, int index, double x) {
