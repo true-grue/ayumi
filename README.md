@@ -1,3 +1,8 @@
+News
+====
+
+JavaScript implementation by Alexander Kovalenko: https://github.com/alexanderk23/ayumi-js
+
 Ayumi API reference
 ===================
 
