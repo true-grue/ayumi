@@ -101,24 +101,27 @@ int main(int argc, char** argv) {
   struct ayumi ay;
   if (argc != 3) {
     printf("ayumi_render input.txt output.wav\n");
-    return 0;
+    return 1;
   }
   set_default_text_data(&t);
   if(!load_text_file(argv[1], &t)) {
     printf("Load error\n");
-    return 0;
+    return 1;
   }
   sample_count = (int) ((t.sample_rate / t.frame_rate) * t.frame_count);
   if (sample_count == 0) {
     printf("No frames\n");
-    return 0;
+    return 1;
   }
   sample_data = (float*) malloc(sample_count * sizeof(float) * 2);
   if (sample_data == NULL) {
     printf("Memory allocation error\n");
-    return 0;
+    return 1;
   }
-  ayumi_configure(&ay, t.is_ym, t.clock_rate, t.sample_rate);
+  if (!ayumi_configure(&ay, t.is_ym, t.clock_rate, t.sample_rate)) {
+    printf("ayumi_configure error (wrong sample rate?)\n");
+    return 1;
+  }
   if (t.pan[0] >= 0) {
     ayumi_set_pan(&ay, 0, t.pan[0], t.eqp_stereo_on);
   }
@@ -131,7 +134,7 @@ int main(int argc, char** argv) {
   ayumi_render(&ay, &t, sample_data);
   if (!save_wave_file(argv[2], sample_data, t.sample_rate, 2, sample_count)) {
     printf("Save error\n");
-    return 0;
+    return 1;
   }
   return 0;
 }

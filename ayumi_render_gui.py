@@ -148,7 +148,7 @@ def start_ayumi_render(self, command):
     self.l_save['text'] = 'Save error'
   else:
     self.l_save['text'] = command[-1]
-
+   
 def save(self):
   file_to_save = tkFileDialog.asksaveasfilename(filetypes=[('WAV', '.wav')], defaultextension='.wav')
   if not file_to_save or not self.frame_data:

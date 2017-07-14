@@ -141,7 +141,7 @@ static void update_mixer(struct ayumi* ay) {
   }
 }
 
-void ayumi_configure(struct ayumi* ay, int is_ym, double clock_rate, int sr) {
+int ayumi_configure(struct ayumi* ay, int is_ym, double clock_rate, int sr) {
   int i;
   memset(ay, 0, sizeof(struct ayumi));
   ay->step = clock_rate / (sr * 8 * DECIMATE_FACTOR);
@@ -151,6 +151,7 @@ void ayumi_configure(struct ayumi* ay, int is_ym, double clock_rate, int sr) {
   for (i = 0; i < TONE_CHANNELS; i += 1) {
     ayumi_set_tone(ay, i, 1);
   }
+  return ay->step < 1;
 }
 
 void ayumi_set_pan(struct ayumi* ay, int index, double pan, int is_eqp) {
