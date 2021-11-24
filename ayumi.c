@@ -170,7 +170,8 @@ void ayumi_set_tone(struct ayumi* ay, int index, int period) {
 }
 
 void ayumi_set_noise(struct ayumi* ay, int period) {
-  ay->noise_period = period & 0x1f;
+  period &= 0x1f;
+  ay->noise_period = (period == 0) | period;
 }
 
 void ayumi_set_mixer(struct ayumi* ay, int index, int t_off, int n_off, int e_on) {
